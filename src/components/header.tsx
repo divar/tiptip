@@ -42,13 +42,13 @@ export default function Header() {
             margin:       '0 auto',
             bgcolor:      "#d2d2d2",
             borderRadius: 20,
-            height:       "40px",
+            height:       "51px",
             width:        600,
             p:            1,
             pl:           3,
             display:      'flex',
           }}>
-            <input className="flex-1 bg-transparent border-transparent outline-none"/>
+            <input className="flex-1 bg-transparent border-transparent outline-none text-gray-700"/>
             <IconButton aria-label="Example">
               <Icon>search</Icon>
             </IconButton>
