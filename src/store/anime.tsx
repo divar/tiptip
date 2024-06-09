@@ -1,6 +1,6 @@
 import {create} from 'zustand';
 import {getAnimeVideos} from '@/api';
-import {animeVideoParams} from "@/api/anime";
+import {animeVideoParams, getAnimeVideoById, getAnimeVideoRecommendationById} from "@/api/anime";
 
 export type TypeAnime = {
 
@@ -165,7 +165,26 @@ export type TypeAnime = {
       url: string
     }
   ]
-}
+};
+export type TypeRecommendation = {
+  entry: {
+    mal_id: number,
+    url: string,
+    images: {
+      jpg: {
+        image_url: string,
+        small_image_url: string,
+        large_image_url: string
+      },
+      webp: {
+        image_url: string,
+        small_image_url: string,
+        large_image_url: string
+      }
+    },
+    title: string
+  }
+};
 
 export type TypePagination = {
   current_page: number;
@@ -180,20 +199,37 @@ export type TypePagination = {
 
 export type AnimeState = {
   animes: TypeAnime[];
-  FavouriteAnime: TypeAnime[];
+  favouriteAnime: TypeAnime[];
   selectedAnime: TypeAnime | null;
+  recommendedAnimes: TypeRecommendation[];
   pagination: TypePagination;
   getAnime: (page: number) => void;
+  getAnimeById: (id: string) => void;
   setSelectedAnime: (anime: TypeAnime) => void;
+  setAnimes: (animes: TypeAnime[]) => void
+  addFavouriteAnime: (anime: TypeAnime) => void
+  removeFavouriteAnime: (id: TypeAnime) => void
+  getRecommendedAnimes: (id: string) => void;
 }
 
 export const animeStore = create<AnimeState>((set) => ({
-  animes:     [],
-  selectedAnime: null,
-  FavouriteAnime: [],
-  setAnimes:  (animes: TypeAnime[]) => set({animes}),
-  setSelectedAnime:  (selectedAnime: TypeAnime) => set({selectedAnime}),
-  pagination: {
+  animes:               [],
+  selectedAnime:        null,
+  favouriteAnime:       [],
+  recommendedAnimes:    [],
+  setAnimes:            (animes: TypeAnime[]) => set({animes}),
+  addFavouriteAnime:    (anime: TypeAnime) => set(state => ({favouriteAnime: [...state.favouriteAnime, anime]})),
+  removeFavouriteAnime: (anime: TypeAnime) => set(state => {
+    const index    = state.favouriteAnime.findIndex(item => item.mal_id === anime.mal_id);
+    let copyArrays = [...state.favouriteAnime]
+    if (index !== -1) {
+      copyArrays.splice(index, 1);
+    }
+
+    return ({favouriteAnime: copyArrays});
+  }),
+  setSelectedAnime:     (selectedAnime: TypeAnime) => set({selectedAnime}),
+  pagination:           {
     current_page:      1,
     items:             {
       count:    0,
@@ -203,7 +239,7 @@ export const animeStore = create<AnimeState>((set) => ({
     last_visible_page: 0,
     has_next_page:     true,
   },
-  getAnime:   (page: number) => {
+  getAnime:             (page: number) => {
     set({animes: []})
     let params: animeVideoParams = {
       page: page,
@@ -212,12 +248,28 @@ export const animeStore = create<AnimeState>((set) => ({
     getAnimeVideos(params)
       .then(resp => {
         set({
-          animes: resp.data.data,
+          animes:     resp.data.data,
           pagination: {
             ...resp.data.pagination,
             current_page: page,
           }
         })
+      })
+  },
+  getAnimeById:         (id: string) => {
+    set({animes: [], selectedAnime: null})
+    getAnimeVideoById(id)
+      .then(resp => {
+        set({
+          selectedAnime: resp.data.data,
+        })
+      })
+  },
+  getRecommendedAnimes: (id: string) => {
+    set({recommendedAnimes: []})
+    getAnimeVideoRecommendationById(id)
+      .then(resp => {
+        set({recommendedAnimes: resp.data.data})
       })
   }
 }));

@@ -10,3 +10,11 @@ export function getAnimeVideos(params: animeVideoParams) {
       page:      params.page,
     }});
 }
+
+export function getAnimeVideoById(id: string) {
+  return api.get(`/v4/anime/${id}`);
+}
+
+export function getAnimeVideoRecommendationById(id: string) {
+  return api.get(`/v4/anime/${id}/recommendations`);
+}
