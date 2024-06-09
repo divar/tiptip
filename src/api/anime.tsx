@@ -5,7 +5,7 @@ export type animeVideoParams = {
 }
 
 export function getAnimeVideos(params: animeVideoParams) {
-  return api.get(`/v4/anime/`, {
+  return api.get(`/v4/anime`, {
     params:           {
       page:      params.page,
     }});
